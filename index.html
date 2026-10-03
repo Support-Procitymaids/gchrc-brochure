@@ -4,9 +4,113 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>GCHRC 2026 Brochure</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #10241c; color: #f4f1e8; font-family: Georgia, "Times New Roman", serif; }
+    header {
+      min-height: 52px; display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 12px; background: #0c1c16; border-bottom: 1px solid rgba(255,255,255,.12); flex-wrap: wrap;
+    }
+    header p { margin: 0; font-size: 13px; }
+    header span { display: block; font-family: Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #c8b98a; }
+    .tools { display: flex; align-items: center; gap: 6px; font-family: Helvetica, Arial, sans-serif; }
+    button, a.dl {
+      font: 700 13px Helvetica, Arial, sans-serif; color: #10241c; background: #f4f1e8;
+      border: 0; border-radius: 999px; padding: 8px 12px; text-decoration: none; cursor: pointer;
+    }
+    input { width: 52px; border: 0; border-radius: 8px; padding: 7px 8px; font: 700 14px Helvetica, Arial, sans-serif; text-align: center; }
+    #count { font: 12px Helvetica, Arial, sans-serif; color: #c8b98a; }
+    main { height: calc(100% - 68px); overflow: auto; display: flex; justify-content: center; padding: 12px; }
+    canvas { max-width: 100%; height: auto; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+    #status { font: 14px Helvetica, Arial, sans-serif; padding: 24px; }
+    .sheet {
+      position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 5;
+      background: #f7f4ec; color: #14241c; border-radius: 14px; padding: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+      transform: translateY(140%); opacity: 0; transition: transform .35s ease, opacity .35s ease;
+    }
+    .sheet.show { transform: none; opacity: 1; }
+    .sheet strong { display: block; font-size: 18px; margin-bottom: 4px; }
+    .sheet p { margin: 0 0 12px; font: 14px/1.4 Helvetica, Arial, sans-serif; }
+    .row { display: flex; gap: 8px; }
+    .row a, .row button { flex: 1; border-radius: 999px; padding: 11px; font: 700 14px Helvetica, Arial, sans-serif; border: 0; cursor: pointer; text-align: center; text-decoration: none; }
+    .row a { background: #143028; color: #f7f4ec; }
+    .row button { background: transparent; color: #143028; }
+  </style>
 </head>
 <body>
-  <p>Updated viewer. Open the file and use the page box for page 15.</p>
-  <p><a href="https://drive.google.com/file/d/1Nc9DWGJitgA4VmZsjZ-2d83jWBWbISqF/view#page=15">Open page 15</a></p>
+  <header>
+    <p><span>GCHRC · 2026 edition</span>Together we build</p>
+    <div class="tools">
+      <button type="button" id="prev">Prev</button>
+      <input id="page" type="number" min="1" value="1" inputmode="numeric" />
+      <span id="count">/ 40</span>
+      <button type="button" id="next">Next</button>
+      <a class="dl" href="brochure.pdf" download="GCHRC-Brochure-2026.pdf">Download</a>
+    </div>
+  </header>
+  <main>
+    <p id="status">Opening the brochure…</p>
+    <canvas id="view" hidden></canvas>
+  </main>
+  <div class="sheet" id="sheet" role="dialog" aria-label="Download the brochure">
+    <strong>Save a copy?</strong>
+    <p>The brochure is open. No sign-in is needed. Download it if you want to keep it on your phone.</p>
+    <div class="row">
+      <a href="brochure.pdf" download="GCHRC-Brochure-2026.pdf">Download</a>
+      <button type="button" id="later">Not now</button>
+    </div>
+  </div>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    var pdfDoc = null, pageNum = 1, rendering = false;
+    var canvas = document.getElementById("view");
+    var ctx = canvas.getContext("2d");
+    var input = document.getElementById("page");
+    var statusEl = document.getElementById("status");
+
+    function render(num) {
+      rendering = true;
+      pdfDoc.getPage(num).then(function (page) {
+        var base = page.getViewport({ scale: 1 });
+        var scale = Math.min((window.innerWidth - 24) / base.width, 1.6);
+        var viewport = page.getViewport({ scale: scale });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.hidden = false;
+        statusEl.hidden = true;
+        return page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      }).then(function () {
+        rendering = false;
+        pageNum = num;
+        input.value = num;
+      });
+    }
+
+    function go(n) {
+      if (!pdfDoc || rendering) return;
+      if (n < 1) n = 1;
+      if (n > pdfDoc.numPages) n = pdfDoc.numPages;
+      render(n);
+    }
+
+    pdfjsLib.getDocument("brochure.pdf").promise.then(function (pdf) {
+      pdfDoc = pdf;
+      document.getElementById("count").textContent = "/ " + pdf.numPages;
+      input.max = pdf.numPages;
+      render(1);
+    }).catch(function () {
+      statusEl.textContent = "The brochure could not open here. Use Download.";
+    });
+
+    document.getElementById("prev").onclick = function () { go(pageNum - 1); };
+    document.getElementById("next").onclick = function () { go(pageNum + 1); };
+    input.addEventListener("change", function () { go(parseInt(input.value, 10) || 1); });
+    setTimeout(function () { document.getElementById("sheet").classList.add("show"); }, 4000);
+    document.getElementById("later").onclick = function () {
+      document.getElementById("sheet").classList.remove("show");
+    };
+  </script>
 </body>
 </html>
