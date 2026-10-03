@@ -3,61 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="robots" content="noindex" />
   <title>GCHRC 2026 Brochure</title>
-  <style>
-    :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; background: #10241c; color: #f4f1e8; font-family: Georgia, "Times New Roman", serif; }
-    header {
-      height: 52px; display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 0 14px; background: #0c1c16; border-bottom: 1px solid rgba(255,255,255,.12);
-    }
-    header p { margin: 0; font-size: 13px; letter-spacing: .02em; }
-    header span { display: block; font-family: Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #c8b98a; }
-    a.dl {
-      font-family: Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 700;
-      color: #10241c; background: #f4f1e8; text-decoration: none; padding: 8px 12px; border-radius: 999px;
-      white-space: nowrap;
-    }
-    iframe { width: 100%; height: calc(100% - 52px); border: 0; background: #fff; }
-    .sheet {
-      position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 5;
-      background: #f7f4ec; color: #14241c; border-radius: 14px; padding: 16px 16px 14px;
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-      transform: translateY(140%); opacity: 0; transition: transform .35s ease, opacity .35s ease;
-    }
-    .sheet.show { transform: none; opacity: 1; }
-    .sheet strong { display: block; font-size: 18px; margin-bottom: 4px; }
-    .sheet p { margin: 0 0 12px; font-family: Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.4; }
-    .row { display: flex; gap: 8px; }
-    .row a, .row button {
-      flex: 1; border: 0; border-radius: 999px; padding: 11px 10px; font: 700 14px Helvetica, Arial, sans-serif; cursor: pointer;
-    }
-    .row a { background: #143028; color: #f7f4ec; text-align: center; text-decoration: none; }
-    .row button { background: transparent; color: #143028; }
-  </style>
 </head>
 <body>
-  <header>
-    <p><span>GCHRC · 2026 edition</span>Together we build</p>
-    <a class="dl" href="https://drive.google.com/uc?export=download&id=1Nc9DWGJitgA4VmZsjZ-2d83jWBWbISqF">Download</a>
-  </header>
-  <iframe title="GCHRC 2026 brochure" src="https://drive.google.com/file/d/1Nc9DWGJitgA4VmZsjZ-2d83jWBWbISqF/preview" allow="autoplay"></iframe>
-  <div class="sheet" id="sheet" role="dialog" aria-label="Download the brochure">
-    <strong>Save a copy?</strong>
-    <p>The brochure is open. Download it if you want to keep it on your phone.</p>
-    <div class="row">
-      <a href="https://drive.google.com/uc?export=download&id=1Nc9DWGJitgA4VmZsjZ-2d83jWBWbISqF">Download</a>
-      <button type="button" id="later">Not now</button>
-    </div>
-  </div>
-  <script>
-    var sheet = document.getElementById("sheet");
-    setTimeout(function () { sheet.classList.add("show"); }, 4000);
-    document.getElementById("later").addEventListener("click", function () {
-      sheet.classList.remove("show");
-    });
-  </script>
+  <p>Updated viewer. Open the file and use the page box for page 15.</p>
+  <p><a href="https://drive.google.com/file/d/1Nc9DWGJitgA4VmZsjZ-2d83jWBWbISqF/view#page=15">Open page 15</a></p>
 </body>
 </html>
