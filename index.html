@@ -28,9 +28,10 @@
       position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 5;
       background: #f7f4ec; color: #14241c; border-radius: 14px; padding: 16px;
       box-shadow: 0 10px 40px rgba(0,0,0,.35);
-      transform: translateY(140%); opacity: 0; transition: transform .35s ease, opacity .35s ease;
+      transform: translateY(140%); opacity: 0; pointer-events: none;
+      transition: transform .35s ease, opacity .35s ease;
     }
-    .sheet.show { transform: none; opacity: 1; }
+    .sheet.show { transform: none; opacity: 1; pointer-events: auto; }
     .sheet strong { display: block; font-size: 18px; margin-bottom: 4px; }
     .sheet p { margin: 0 0 12px; font: 14px/1.4 Helvetica, Arial, sans-serif; }
     .row { display: flex; gap: 8px; }
@@ -47,7 +48,7 @@
       <input id="page" type="number" min="1" value="1" inputmode="numeric" />
       <span id="count">/ 40</span>
       <button type="button" id="next">Next</button>
-      <a class="dl" href="brochure.pdf" download="GCHRC-Brochure-2026.pdf">Download</a>
+      <a class="dl" id="dl" href="#">Download</a>
     </div>
   </header>
   <main>
@@ -58,17 +59,32 @@
     <strong>Save a copy?</strong>
     <p>The brochure is open. No sign-in is needed. Download it if you want to keep it on your phone.</p>
     <div class="row">
-      <a href="brochure.pdf" download="GCHRC-Brochure-2026.pdf">Download</a>
+      <a id="dl2" href="#">Download</a>
       <button type="button" id="later">Not now</button>
     </div>
   </div>
   <script>
+    var PDF = "https://cdn.jsdelivr.net/gh/Support-Procitymaids/gchrc-brochure@main/brochure.pdf";
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    var pdfDoc = null, pageNum = 1, rendering = false;
+    var pdfDoc = null, pageNum = 1, rendering = false, prompted = false;
     var canvas = document.getElementById("view");
     var ctx = canvas.getContext("2d");
     var input = document.getElementById("page");
     var statusEl = document.getElementById("status");
+
+    function saveCopy(e) {
+      if (e) e.preventDefault();
+      fetch(PDF).then(function (r) { return r.blob(); }).then(function (blob) {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "GCHRC-Brochure-2026.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }).catch(function () { window.location.href = PDF; });
+    }
+    document.getElementById("dl").addEventListener("click", saveCopy);
+    document.getElementById("dl2").addEventListener("click", saveCopy);
 
     function render(num) {
       rendering = true;
@@ -85,6 +101,10 @@
         rendering = false;
         pageNum = num;
         input.value = num;
+        if (!prompted) {
+          prompted = true;
+          setTimeout(function () { document.getElementById("sheet").classList.add("show"); }, 4000);
+        }
       });
     }
 
@@ -95,19 +115,18 @@
       render(n);
     }
 
-    pdfjsLib.getDocument("brochure.pdf").promise.then(function (pdf) {
+    pdfjsLib.getDocument(PDF).promise.then(function (pdf) {
       pdfDoc = pdf;
       document.getElementById("count").textContent = "/ " + pdf.numPages;
       input.max = pdf.numPages;
       render(1);
     }).catch(function () {
-      statusEl.textContent = "The brochure could not open here. Use Download.";
+      statusEl.innerHTML = "The brochure could not open here. <a href=\"" + PDF + "\" style=\"color:#f4f1e8\">Download it</a>.";
     });
 
     document.getElementById("prev").onclick = function () { go(pageNum - 1); };
     document.getElementById("next").onclick = function () { go(pageNum + 1); };
     input.addEventListener("change", function () { go(parseInt(input.value, 10) || 1); });
-    setTimeout(function () { document.getElementById("sheet").classList.add("show"); }, 4000);
     document.getElementById("later").onclick = function () {
       document.getElementById("sheet").classList.remove("show");
     };
